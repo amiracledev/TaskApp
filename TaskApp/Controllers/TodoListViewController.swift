@@ -8,7 +8,7 @@
 
 import UIKit
 import CoreData
-class TodoListViewController: UITableViewController, UISearchBarDelegate {
+class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
@@ -81,7 +81,6 @@ class TodoListViewController: UITableViewController, UISearchBarDelegate {
     //Mark - Model manipulation
     
     func saveItems() {
-        
         do {
             try context.save()
         } catch {
@@ -90,8 +89,7 @@ class TodoListViewController: UITableViewController, UISearchBarDelegate {
         tableView.reloadData()
     }
     
-    func loadItems() {
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         do {
             itemArray = try context.fetch(request)
         } catch {
@@ -103,7 +101,12 @@ class TodoListViewController: UITableViewController, UISearchBarDelegate {
 extension TodoListViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    
         let request: NSFetchRequest<Item> = Item.fetchRequest()
+         request.predicate = NSPredicate(format: "title CONTAINS [cd] %@", searchBar.text!)
+       
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         
+        loadItems(with: request)
     }
 }
